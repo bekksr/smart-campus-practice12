@@ -1,15 +1,12 @@
-import { CheckCircle2, XCircle, Clock4 } from 'lucide-react';
-import type { CheckOutcome } from '@/lib/availability';
-import { formatRange, formatDuration } from '@/lib/time';
+import { CheckCircle2, XCircle, Tag } from 'lucide-react';
+import type { ContractResult } from '@/lib/contract';
 
 interface ResultBannerProps {
-  outcome: CheckOutcome | null;
+  result: ContractResult;
 }
 
-export function ResultBanner({ outcome }: ResultBannerProps) {
-  if (!outcome) return null;
-
-  const available = outcome.status === 'available';
+export function ResultBanner({ result }: ResultBannerProps) {
+  const available = result.availability;
 
   return (
     <div
@@ -41,26 +38,21 @@ export function ResultBanner({ outcome }: ResultBannerProps) {
             available ? 'text-emerald-800' : 'text-rose-800'
           }`}
         >
-          {available
-            ? (outcome as Extract<CheckOutcome, { status: 'available' }>).message
-            : outcome.reason}
+          {result.message}
         </p>
-        {outcome.status === 'unavailable' && outcome.detail && (
-          <p className="mt-1 text-sm leading-relaxed text-rose-700/90">
-            {outcome.detail}
-          </p>
-        )}
-        {available && (
-          <div className="mt-3 flex flex-wrap gap-4 text-sm text-emerald-800">
-            <span className="inline-flex items-center gap-1.5">
-              <Clock4 size={15} />
-              {formatRange(outcome.start, outcome.end)}
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              {formatDuration(outcome.end - outcome.start)}
-            </span>
-          </div>
-        )}
+
+        {/* Reason code badge */}
+        <div className="mt-2 flex items-center gap-2">
+          <span
+            className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-semibold ${
+              available
+                ? 'bg-emerald-100 text-emerald-700'
+                : 'bg-rose-100 text-rose-700'
+            }`}
+          >
+            <Tag size={11} /> {result.reasonCode}
+          </span>
+        </div>
       </div>
     </div>
   );

@@ -1,41 +1,38 @@
 import { getBookingsForRoom } from './lib/bookingSelectors';
 import { useMemo, useState } from 'react';
 import { ExplainAvailability } from '@/components/ExplainAvailability';
-import { getAvailabilityReasonCode } from '@/lib/ai/reasonCode';
 import {
   CalendarSearch,
   Clock4,
   DoorClosed,
   Info,
   RotateCcw,
+  Timer,
 } from 'lucide-react';
 import { rooms, bookings, Room } from '@/data/rooms';
-import { checkAvailability, CheckOutcome } from '@/lib/availability';
 import {
-  defaultRequestInterval,
+  checkAvailabilityContract,
+  ContractResult,
+  ContractInput,
+  REFERENCE_TIME,
+} from '@/lib/contract';
+import {
   formatDuration,
   formatRange,
   minutesToTime,
-  nowAsTimeString,
   timeToMinutes,
 } from '@/lib/time';
 import { RoomCard } from '@/components/RoomCard';
 import { ScheduleList } from '@/components/ScheduleList';
 import { ResultBanner } from '@/components/ResultBanner';
 
+const REFERENCE_MINUTES = timeToMinutes(REFERENCE_TIME) ?? 480;
+
 function App() {
   const [selectedRoomId, setSelectedRoomId] = useState<string>(rooms[0].id);
-  const [currentTimeStr, setCurrentTimeStr] = useState<string>(nowAsTimeString());
-  const initialInterval = defaultRequestInterval(
-    timeToMinutes(nowAsTimeString()) ?? 0
-  );
-  const [startTimeStr, setStartTimeStr] = useState<string>(
-    minutesToTime(initialInterval.start)
-  );
-  const [endTimeStr, setEndTimeStr] = useState<string>(
-    minutesToTime(initialInterval.end)
-  );
-  const [outcome, setOutcome] = useState<CheckOutcome | null>(null);
+  const [startTimeStr, setStartTimeStr] = useState<string>('09:00');
+  const [durationStr, setDurationStr] = useState<string>('60');
+  const [result, setResult] = useState<ContractResult | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
   const selectedRoom: Room = useMemo(
@@ -48,52 +45,49 @@ function App() {
     [selectedRoomId]
   );
 
-  const candidateDuration = useMemo(() => {
-    const s = timeToMinutes(startTimeStr);
-    const e = timeToMinutes(endTimeStr);
-    if (s === null || e === null || e <= s) return 0;
-    return e - s;
-  }, [startTimeStr, endTimeStr]);
+  const parsedDuration = parseInt(durationStr, 10);
+  const durationValid =
+    Number.isFinite(parsedDuration) && parsedDuration > 0 && parsedDuration <= 120;
+  const startValid = /^([01]\d|2[0-3]):[0-5]\d$/.test(startTimeStr);
+  const startMinutes = timeToMinutes(startTimeStr);
+  const startAfterReference =
+    startMinutes !== null && startMinutes > REFERENCE_MINUTES;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const start = timeToMinutes(startTimeStr);
-    const end = timeToMinutes(endTimeStr);
-    const currentTime = timeToMinutes(currentTimeStr);
 
-    if (start === null || end === null || currentTime === null) {
-      setOutcome({
-        status: 'unavailable',
-        reason: 'Please enter valid times in 24-hour HH:MM format.',
-      });
-      setSubmitted(true);
-      return;
-    }
+    const input: ContractInput = {
+      startTime: startTimeStr,
+      duration: parsedDuration,
+      roomId: selectedRoomId,
+      blocked: selectedRoom.blocked,
+      bookings: roomBookings,
+      currentTime: REFERENCE_TIME,
+    };
 
-    const result = checkAvailability({
-      start,
-      end,
-      currentTime,
-      room: selectedRoom,
-      existingBookings: roomBookings,
-    });
-    setOutcome(result);
+    const contractResult = checkAvailabilityContract(input);
+    setResult(contractResult);
     setSubmitted(true);
   };
 
   const handleReset = () => {
-    const ct = timeToMinutes(currentTimeStr) ?? 0;
-    const interval = defaultRequestInterval(ct);
-    setStartTimeStr(minutesToTime(interval.start));
-    setEndTimeStr(minutesToTime(interval.end));
-    setOutcome(null);
+    setStartTimeStr('09:00');
+    setDurationStr('60');
+    setResult(null);
     setSubmitted(false);
   };
 
-  const durationOverLimit = candidateDuration > 120;
-  const validExplanationTimes =
-    /^([01]\d|2[0-3]):[0-5]\d$/.test(startTimeStr) &&
-    /^([01]\d|2[0-3]):[0-5]\d$/.test(endTimeStr);
+  const handleRoomSelect = (roomId: string) => {
+    setSelectedRoomId(roomId);
+    setResult(null);
+    setSubmitted(false);
+  };
+
+  const endTimeStr = useMemo(() => {
+    const s = timeToMinutes(startTimeStr);
+    if (s === null || !durationValid) return '';
+    return minutesToTime(s + parsedDuration);
+  }, [startTimeStr, parsedDuration, durationValid]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
@@ -132,11 +126,7 @@ function App() {
                     key={room.id}
                     room={room}
                     selected={room.id === selectedRoomId}
-                    onSelect={() => {
-                      setSelectedRoomId(room.id);
-                      setOutcome(null);
-                      setSubmitted(false);
-                    }}
+                    onSelect={() => handleRoomSelect(room.id)}
                   />
                 ))}
               </div>
@@ -158,6 +148,7 @@ function App() {
             <form
               onSubmit={handleSubmit}
               className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6"
+              aria-label="Availability check form"
             >
               <div className="mb-4 flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
@@ -175,109 +166,125 @@ function App() {
                 </button>
               </div>
 
-              {/* Current time */}
-              <label className="mb-4 block">
-                <span className="mb-1.5 block text-sm font-medium text-slate-700">
-                  Current time
+              {/* Reference time badge */}
+              <div className="mb-4 flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-500">
+                <Info size={13} />
+                Reference current time is fixed at{' '}
+                <span className="font-semibold text-slate-700">
+                  {REFERENCE_TIME}
                 </span>
-                <input
-                  type="time"
-                  value={currentTimeStr}
-                  onChange={(e) => {
-                    setCurrentTimeStr(e.target.value);
-                    setOutcome(null);
-                    setSubmitted(false);
-                  }}
-                  className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 outline-none transition-all focus:border-sky-400 focus:ring-2 focus:ring-sky-200"
-                />
-                <span className="mt-1 block text-xs text-slate-400">
-                  The start of your request must be after this time.
-                </span>
-              </label>
+                . Your start must be after this.
+              </div>
 
-              {/* Start + End */}
+              {/* Start time + Duration */}
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <label className="block">
-                  <span className="mb-1.5 block text-sm font-medium text-slate-700">
-                    Requested start
+                  <span
+                    id="start-label"
+                    className="mb-1.5 block text-sm font-medium text-slate-700"
+                  >
+                    Requested start time
                   </span>
                   <input
                     type="time"
                     value={startTimeStr}
                     onChange={(e) => {
                       setStartTimeStr(e.target.value);
-                      setOutcome(null);
                       setSubmitted(false);
                     }}
+                    aria-labelledby="start-label"
+                    aria-invalid={submitted && !startAfterReference}
                     placeholder="HH:MM"
                     className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 outline-none transition-all focus:border-sky-400 focus:ring-2 focus:ring-sky-200"
                   />
                 </label>
+
                 <label className="block">
-                  <span className="mb-1.5 block text-sm font-medium text-slate-700">
-                    Requested end
+                  <span
+                    id="duration-label"
+                    className="mb-1.5 block text-sm font-medium text-slate-700"
+                  >
+                    Duration (minutes)
                   </span>
                   <input
-                    type="time"
-                    value={endTimeStr}
+                    type="number"
+                    value={durationStr}
                     onChange={(e) => {
-                      setEndTimeStr(e.target.value);
-                      setOutcome(null);
+                      setDurationStr(e.target.value);
                       setSubmitted(false);
                     }}
-                    placeholder="HH:MM"
+                    aria-labelledby="duration-label"
+                    aria-invalid={submitted && !durationValid}
+                    min={1}
+                    max={120}
+                    step={1}
+                    placeholder="1–120"
                     className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 outline-none transition-all focus:border-sky-400 focus:ring-2 focus:ring-sky-200"
                   />
                 </label>
               </div>
 
               {/* Duration hint */}
-              {candidateDuration > 0 && (
+              {durationValid && parsedDuration > 0 && (
                 <div
                   className={`mt-3 flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium ${
-                    durationOverLimit
+                    parsedDuration > 120
                       ? 'bg-amber-50 text-amber-700'
                       : 'bg-sky-50 text-sky-700'
                   }`}
                 >
-                  <Info size={13} />
-                  Requested duration: {formatDuration(candidateDuration)}
-                  {durationOverLimit && ' — exceeds the 2-hour maximum.'}
+                  <Timer size={13} />
+                  Requested duration: {formatDuration(parsedDuration)}
+                  {endTimeStr && ` (ends at ${endTimeStr})`}
+                  {parsedDuration > 120 && ' — exceeds the 2-hour maximum.'}
                 </div>
+              )}
+
+              {/* Inline validation hints */}
+              {submitted && !startAfterReference && startValid && (
+                <p className="mt-2 text-xs font-medium text-amber-600">
+                  Start time must be later than {REFERENCE_TIME}.
+                </p>
+              )}
+              {submitted && !durationValid && (
+                <p className="mt-2 text-xs font-medium text-amber-600">
+                  Duration must be between 1 and 120 minutes.
+                </p>
               )}
 
               {/* Submit */}
               <button
                 type="submit"
-                className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-sky-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-sky-700 active:scale-[0.99] sm:w-auto sm:px-6"
+                className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-sky-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-300 focus:ring-offset-2 active:scale-[0.99] sm:w-auto sm:px-6"
               >
                 <CalendarSearch size={17} /> Check availability
               </button>
 
               {/* Result */}
-              {submitted && <ResultBanner outcome={outcome} />}
-              {submitted && outcome && validExplanationTimes && (
+              {submitted && result && (
+                <ResultBanner result={result} />
+              )}
+
+              {/* AI Explanation */}
+              {submitted && result && startValid && durationValid && (
                 <ExplainAvailability
                   request={{
                     roomLabel: selectedRoom.name,
                     startTime: startTimeStr,
-                    endTime: endTimeStr,
-                    isAvailable: outcome.status === 'available',
-                    reasonCode: getAvailabilityReasonCode(outcome),
-                    reasonDetail:
-                     outcome.status === 'unavailable'
-                       ? outcome.detail ?? outcome.reason
-                       : undefined,
+                    endTime: endTimeStr || startTimeStr,
+                    isAvailable: result.availability,
+                    reasonCode: result.reasonCode,
+                    reasonDetail: result.message,
                   }}
                 />
-               )}
+              )}
 
               {/* Decision summary for available */}
-              {submitted && outcome?.status === 'available' && (
+              {submitted && result?.availability && (
                 <p className="mt-3 text-xs text-slate-400">
                   No booking data was modified — this is a read-only
-                  availability check for {selectedRoom.name} (
-                  {formatRange(outcome.start, outcome.end)}).
+                  availability check for {selectedRoom.name}
+                  {endTimeStr && ` (${formatRange(timeToMinutes(startTimeStr) ?? 0, (timeToMinutes(startTimeStr) ?? 0) + parsedDuration)})`}.
                 </p>
               )}
             </form>
@@ -288,15 +295,15 @@ function App() {
                 How availability is decided
               </h3>
               <ul className="grid grid-cols-1 gap-1.5 text-xs leading-relaxed text-slate-500 sm:grid-cols-2">
-                <li>Start must be later than the current time.</li>
-                <li>Interval must fit within 00:00–24:00.</li>
-                <li>Bookings cannot exceed 120 minutes.</li>
+                <li>Start must be later than the current time ({REFERENCE_TIME}).</li>
+                <li>Duration must be 1–120 minutes.</li>
                 <li>Blocked rooms are always unavailable.</li>
                 <li>
                   Overlapping requests are rejected — touching times are fine
-                  (e.g. 11:00 after a 10:00–11:00 booking).
+                  (e.g. 10:30 after a 09:00–10:30 booking).
                 </li>
                 <li>Existing bookings are never changed by a check.</li>
+                <li>Reason codes: AVAILABLE, INVALID_TIME, PAST_START, INVALID_DURATION, BOOKING_OVERLAP, ROOM_BLOCKED.</li>
               </ul>
             </div>
           </section>
@@ -305,9 +312,8 @@ function App() {
 
       <footer className="mx-auto max-w-5xl px-4 pb-8 sm:px-6">
         <p className="text-center text-xs text-slate-400">
-          Prototype — uses fictional sample data. Current time defaults to{' '}
-          {minutesToTime(timeToMinutes(currentTimeStr) ?? 0)} (
-          {nowAsTimeString()} on load).
+          Prototype — uses fictional sample data. Reference time:{' '}
+          {REFERENCE_TIME}.
         </p>
       </footer>
     </div>
