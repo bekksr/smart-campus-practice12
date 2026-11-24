@@ -1,0 +1,19 @@
+
+> vite-react-typescript-starter@0.0.0 test
+> vitest run
+
+
+ RUN  v2.1.9 /home/project/code-based
+
+ ✓ src/lib/availability.bug-reproduction.test.ts (22 tests) 12ms
+ ✓ src/lib/availability.test.ts (20 tests) 7ms
+ ✓ src/lib/contract.test.ts (14 tests) 7ms
+ ✓ src/lib/ai/explainAvailability.test.ts (13 tests) 5ms
+ ✓ src/lib/bookingSelectors.test.ts (4 tests) 3ms
+ ✓ src/lib/availability.regression-r09.test.ts (3 tests) 2ms
+
+ Test Files  6 passed (6)
+      Tests  76 passed (76)
+   Start at  09:43:14
+   Duration  1.17s (transform 121ms, setup 0ms, collect 162ms, tests 35ms, environment 1ms, prepare 341ms)
+
