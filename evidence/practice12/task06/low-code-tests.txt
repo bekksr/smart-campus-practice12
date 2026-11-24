@@ -1,0 +1,15 @@
+
+> smart-campus-lowcode@0.0.0 test
+> vitest run
+
+
+ RUN  v2.1.9 /home/project/low-code
+
+ ✓ src/lib/availability.test.ts (14 tests) 6ms
+ ✓ src/lib/bookingSelectors.test.ts (4 tests) 3ms
+
+ Test Files  2 passed (2)
+      Tests  18 passed (18)
+   Start at  09:48:24
+   Duration  1.40s (transform 59ms, setup 0ms, collect 71ms, tests 9ms, environment 872ms, prepare 190ms)
+
