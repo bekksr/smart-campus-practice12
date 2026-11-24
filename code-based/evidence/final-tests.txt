@@ -1,0 +1,30 @@
+# Evidence: unit tests
+# Regenerated: 2026-11-17
+# Environment: /home/project (Bolt sandbox)
+# Command: npm test
+
+> vite-react-typescript-starter@0.0.0 test
+> vitest run
+
+ RUN  v2.1.9 /home/project
+
+ ✓ src/lib/availability.bug-reproduction.test.ts (22 tests) 6ms
+ ✓ src/lib/availability.test.ts (20 tests) 6ms
+ ✓ src/lib/bookingSelectors.test.ts (4 tests) 3ms
+ ✓ src/lib/availability.regression-r09.test.ts (3 tests) 2ms
+
+ Test Files  4 passed (4)
+      Tests  49 passed (49)
+   Start at: 09:19:51
+   Duration: 947ms
+
+Exit code: 0
+Result: 4 test files, 49 tests passed, 0 failed.
+
+Test breakdown:
+  - availability.bug-reproduction.test.ts: 22 tests (BUG-A / BUG-B regression)
+  - availability.test.ts: 20 tests (AC1–AC5 unit tests)
+  - bookingSelectors.test.ts: 4 tests (booking selector logic)
+  - availability.regression-r09.test.ts: 3 tests (R-09 non-finite input guard)
+
+Previous stale snapshot reported 42 tests from /Users/beka/Desktop/... — superseded.

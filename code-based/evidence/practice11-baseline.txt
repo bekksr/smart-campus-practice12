@@ -1,0 +1,54 @@
+# Practice #11 — Baseline Report
+
+Date: 2026-11-21
+Project: Smart Campus Room Availability Checker
+Source: Practice #10 GitHub repository
+Branch: main
+Baseline commit: 671790d
+Checkpoint: practice11-baseline-2026-11-21
+
+## Environment
+Dependency installation: npm ci
+Packages installed: 319
+
+## Test Results
+Command: npm test
+Test files: 4 passed
+Tests: 49 passed
+Failed: 0
+
+## Production Build
+Command: npm run build
+Result: SUCCESS
+Modules transformed: 1575
+Build time: 781ms
+Warning: Outdated caniuse-lite database.
+
+## TypeScript
+Command: npm run typecheck
+Result: SUCCESS
+Type errors: 0
+
+## ESLint
+Command: npm run lint
+Result: Completed without lint errors.
+Warning: TypeScript 5.6.3 is outside the officially supported range of @typescript-eslint/typescript-estree.
+
+## Dependency Audit
+25 vulnerabilities:
+2 low, 7 moderate, 14 high, 2 critical.
+
+No dependency fixes applied.
+
+## Architecture
+Availability function: src/lib/availability.ts
+Main UI: src/App.tsx
+Result component: src/components/ResultBanner.tsx
+Repository instructions: AGENTS.md
+
+## Existing Constraints
+- Preserve deterministic availability rules.
+- No database or authentication.
+- No booking persistence.
+- Use fictional booking data.
+- Preserve existing tests and acceptance criteria.

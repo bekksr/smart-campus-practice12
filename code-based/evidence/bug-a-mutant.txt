@@ -1,0 +1,66 @@
+
+ RUN  v2.1.9 /Users/beka/Desktop/smart-campus-practice08-backup/Practice07_v2_clean/project
+
+ ❯ src/lib/availability.mutants.test.ts (22 tests | 3 failed) 5ms
+   × checkAvailability > allows a request starting exactly when an existing booking ends (touching start) 3ms
+     → expected 'unavailable' to be 'available' // Object.is equality
+   × checkAvailability > allows a request ending exactly when an existing booking starts (touching end) 0ms
+     → expected 'unavailable' to be 'available' // Object.is equality
+   × BUG-A check: allows bookings that touch at endpoints 0ms
+     → expected 'unavailable' to be 'available' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/lib/availability.mutants.test.ts > checkAvailability > allows a request starting exactly when an existing booking ends (touching start)
+AssertionError: expected 'unavailable' to be 'available' // Object.is equality
+
+Expected: "available"
+Received: "unavailable"
+
+ ❯ src/lib/availability.mutants.test.ts:226:27
+    224|       existingBookings: [baseBooking],
+    225|     });
+    226|     expect(result.status).toBe('available');
+       |                           ^
+    227|   });
+    228| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/lib/availability.mutants.test.ts > checkAvailability > allows a request ending exactly when an existing booking starts (touching end)
+AssertionError: expected 'unavailable' to be 'available' // Object.is equality
+
+Expected: "available"
+Received: "unavailable"
+
+ ❯ src/lib/availability.mutants.test.ts:237:27
+    235|       existingBookings: [baseBooking],
+    236|     });
+    237|     expect(result.status).toBe('available');
+       |                           ^
+    238|   });
+    239| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/lib/availability.mutants.test.ts > BUG-A check: allows bookings that touch at endpoints
+AssertionError: expected 'unavailable' to be 'available' // Object.is equality
+
+Expected: "available"
+Received: "unavailable"
+
+ ❯ src/lib/availability.mutants.test.ts:331:27
+    329|     });
+    330| 
+    331|     expect(result.status).toBe('available');
+       |                           ^
+    332|   });
+    333| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 19 passed (22)
+   Start at  18:54:06
+   Duration  199ms (transform 21ms, setup 0ms, collect 20ms, tests 5ms, environment 0ms, prepare 62ms)
+

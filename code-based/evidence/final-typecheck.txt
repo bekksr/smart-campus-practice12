@@ -1,0 +1,10 @@
+# Evidence: typecheck
+# Regenerated: 2026-11-17
+# Environment: /home/project (Bolt sandbox)
+# Command: npm run typecheck
+
+> vite-react-typescript-starter@0.0.0 typecheck
+> tsc --noEmit -p tsconfig.app.json
+
+Exit code: 0
+Result: Clean — no type errors.

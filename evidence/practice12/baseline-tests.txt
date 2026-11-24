@@ -1,0 +1,18 @@
+
+> vite-react-typescript-starter@0.0.0 test
+> vitest run
+
+
+ RUN  v2.1.9 /Users/beka/Desktop/smart-campus-practice11
+
+ ✓ src/lib/availability.regression-r09.test.ts (3 tests) 1ms
+ ✓ src/lib/bookingSelectors.test.ts (4 tests) 1ms
+ ✓ src/lib/availability.bug-reproduction.test.ts (22 tests) 2ms
+ ✓ src/lib/availability.test.ts (20 tests) 3ms
+ ✓ src/lib/ai/explainAvailability.test.ts (13 tests) 3ms
+
+ Test Files  5 passed (5)
+      Tests  62 passed (62)
+   Start at  13:41:19
+   Duration  309ms (transform 85ms, setup 0ms, collect 134ms, tests 10ms, environment 0ms, prepare 193ms)
+

@@ -1,0 +1,14 @@
+
+> vite-react-typescript-starter@0.0.0 test
+> vitest run
+
+
+ RUN  v2.1.9 /Users/beka/Desktop/smart-campus-practice08-backup/Practice07_v2_clean/project
+
+ ✓ src/lib/availability.test.ts (20 tests) 2ms
+
+ Test Files  1 passed (1)
+      Tests  20 passed (20)
+   Start at  18:38:23
+   Duration  335ms (transform 24ms, setup 0ms, collect 20ms, tests 2ms, environment 0ms, prepare 41ms)
+

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Bug Detector"
+  short_description: "Reproduce, diagnose, fix, and verify software bugs"
+  default_prompt: "Use the Bug Detector workflow to investigate the bug, explain its root cause, make a minimal fix when justified, and verify the result with tests."

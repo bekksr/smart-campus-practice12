@@ -1,0 +1,30 @@
+
+ RUN  v2.1.9 /Users/beka/Desktop/smart-campus-practice08-backup/Practice07_v2_clean/project
+
+ ❯ src/lib/availability.mutant-b.test.ts (22 tests | 1 failed | 21 skipped) 3ms
+   × BUG-B check: preserves the original bookings array 3ms
+     → expected '[{"roomId":"test-101","start":600,"en…' to be '[{"roomId":"test-101","start":600,"en…' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/lib/availability.mutant-b.test.ts > BUG-B check: preserves the original bookings array
+AssertionError: expected '[{"roomId":"test-101","start":600,"en…' to be '[{"roomId":"test-101","start":600,"en…' // Object.is equality
+
+Expected: "[{"roomId":"test-101","start":600,"end":660,"title":"Standing Meeting","bookedBy":"T. Tester"}]"
+Received: "[{"roomId":"test-101","start":600,"end":660,"title":"MUTATED","bookedBy":"T. Tester"}]"
+
+ ❯ src/lib/availability.mutant-b.test.ts:346:38
+    344|     });
+    345| 
+    346|     expect(JSON.stringify(bookings)).toBe(before);
+       |                                      ^
+    347|   });
+    348| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 21 skipped (22)
+   Start at  18:58:57
+   Duration  280ms (transform 22ms, setup 0ms, collect 19ms, tests 3ms, environment 0ms, prepare 32ms)
+
