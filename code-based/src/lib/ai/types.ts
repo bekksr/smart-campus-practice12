@@ -1,8 +1,8 @@
 export type AvailabilityReasonCode =
   | 'AVAILABLE'
   | 'INVALID_TIME'
-  | 'PAST_TIME'
-  | 'DURATION_EXCEEDED'
+  | 'PAST_START'
+  | 'INVALID_DURATION'
   | 'ROOM_BLOCKED'
   | 'BOOKING_OVERLAP';
 

@@ -19,12 +19,12 @@ export function generateMockExplanation(
         explanation = 'The requested time interval is invalid. Please check the start and end times.';
         break;
 
-      case 'PAST_TIME':
+      case 'PAST_START':
         explanation = 'The requested start time must be later than the current time.';
         break;
 
-      case 'DURATION_EXCEEDED':
-        explanation = 'The requested interval exceeds the maximum allowed duration of 120 minutes.';
+      case 'INVALID_DURATION':
+        explanation = 'The requested duration must be greater than zero and no more than 120 minutes.';
         break;
 
       case 'ROOM_BLOCKED':

@@ -87,7 +87,7 @@ describe('explainAvailability', () => {
     const result = explainAvailability({
       ...validRequest,
       isAvailable: false,
-      reasonCode: 'PAST_TIME',
+      reasonCode: 'PAST_START',
     });
 
     expect(result.explanation).toContain('later');
@@ -97,7 +97,7 @@ describe('explainAvailability', () => {
     const result = explainAvailability({
       ...validRequest,
       isAvailable: false,
-      reasonCode: 'DURATION_EXCEEDED',
+      reasonCode: 'INVALID_DURATION',
     });
 
     expect(result.explanation).toContain('120 minutes');
